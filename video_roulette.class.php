@@ -26,23 +26,31 @@ class VideoRoulette {
 	}
 
 	public function get_random_file() {
-		$array_result = array();
+		session_start();
 
-		if ($result = $this->db->query("SELECT max(`id`) AS max_id , min(`id`) AS min_id FROM `video_info`")) {
-			$row = $result->fetch_object();
-			$random = rand($row->min_id, $row->max_id);
+		if (isset($_SESSION['current'])) {
+			$_SESSION['current']++;
+		} else {
+			$_SESSION['current'] = 0;
+		}
 
-			if ($result = $this->db->query("SELECT `hash`, `type` FROM `video_info` WHERE `id` >= " . $random . " LIMIT 0,1")) {
-				$row = $result->fetch_row();
+		if (!isset($_SESSION['arr']) || $_SESSION['current'] >= count($_SESSION['arr'])) {
+			$arr = array();
 
-				$array_result['hash'] = $row[0];
-				$array_result['type'] = $row[1];
+			if ($result = $this->db->query("SELECT `hash`, `type` FROM `video_info`")) {
+				while ($row = $result->fetch_row()) {
+					$arr[] = array('hash' => $row[0], 'type' => $row[1]);
+				}
 
 				$result->close();
 			}
+			shuffle($arr);
+
+			$_SESSION['arr'] = $arr;
+			$_SESSION['current'] = 0;
 		}
 
-		echo json_encode($array_result);
+		echo json_encode($_SESSION['arr'][ $_SESSION['current'] ]);
 	}
 
 	public function upload_file($files) {
