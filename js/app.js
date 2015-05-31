@@ -55,7 +55,7 @@ window.addEventListener('load', function() {
 			}
 
 			currentVideo = JSON.parse(req.responseText);
-			container.src = currentVideo.hash + '.' + currentVideo.type;
+			container.getElementsByTagName('source')[0].src = currentVideo.hash + '.' + currentVideo.type;
 			container.load();
 			container.play();
 			container.volume = localStorage.getItem('volume');
