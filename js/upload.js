@@ -4,6 +4,11 @@ window.addEventListener('load', function() {
 	});
 
 	document.getElementById('file-input').addEventListener('change', function(e) {
+		var length = document.getElementById('file-input').files.length;
+		if (length != 1) {
+			return;
+		}
+
 		var req = new XMLHttpRequest();
 		req.open('POST', 'upload.php', true);
 
