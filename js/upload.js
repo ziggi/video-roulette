@@ -46,5 +46,7 @@ window.addEventListener('load', function() {
 		var formData = new FormData();
 		formData.append('file', document.getElementById('file-input').files[0]);
 		req.send(formData);
+
+		alertify.log("Uploading...");
 	});
 });
