@@ -1,7 +1,7 @@
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,700,300,400&subset=latin,cyrillic);
 
 body {
-	background-image: url('../img/background.jpg');
+	background-color: #000;
 	background-size: cover;
 	margin: 0;
 	padding: 0;
@@ -98,7 +98,7 @@ body {
 	color: #777;
 	font-size: 12px;
 	font-weight: bold;
-	text-shadow: 1px 2px 3px rgba(0,0,0,0.3);
+	text-shadow: 1px 2px 3px rgba(0,0,0,0.6)
 }
 
 #info span {
