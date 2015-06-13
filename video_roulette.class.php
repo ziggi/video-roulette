@@ -45,7 +45,20 @@ class VideoRoulette {
 		if (!isset($_SESSION['arr'])) {
 			$arr = array();
 
-			if ($result = $this->db->query("SELECT `hash`, `type` FROM `video_info`")) {
+			$query = "	SELECT
+							`hash`,
+							`type`
+						FROM
+							`video_info`
+							LEFT JOIN `video_report` on
+								`video_report`.`video_id` = `video_info`.`id`
+						GROUP BY
+							`video_info`.`id`
+						HAVING
+							count(`video_report`.`id`) < 5
+						";
+
+			if ($result = $this->db->query($query)) {
 				while ($row = $result->fetch_row()) {
 					$arr[] = array('hash' => $row[0], 'type' => $row[1]);
 				}
