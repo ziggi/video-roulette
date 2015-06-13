@@ -47,16 +47,24 @@ window.addEventListener('load', function() {
 		loadVideo(vid);
 	});
 
-	function loadVideo(container) {
+	document.getElementById('prev').addEventListener('click', function() {
+		loadVideo(vid, 1);
+	});
+
+	function loadVideo(container, isprev) {
+		isprev = typeof isprev !== 'undefined' ? isprev : 0;
+
 		var req = new XMLHttpRequest();
 
 		req.open('POST', 'getvideo.php', true);
+
+		req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
 		req.onreadystatechange = function () {
 			if (req.readyState != 4 || req.status != 200) {
 				return;
 			}
-
+			
 			currentVideo = JSON.parse(req.responseText);
 			container.getElementsByTagName('source')[0].src = currentVideo.hash + '.' + currentVideo.type;
 			container.load();
@@ -65,7 +73,7 @@ window.addEventListener('load', function() {
 			container.muted = localStorage.getItem('muted') == 'true';
 		};
 
-		req.send();
+		req.send('prev=' + isprev);
 	}
 
 	// load background

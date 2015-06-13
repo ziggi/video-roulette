@@ -25,16 +25,24 @@ class VideoRoulette {
 		}
 	}
 
-	public function get_random_file() {
+	public function get_random_file($is_prev = false) {
 		session_start();
 
 		if (isset($_SESSION['current'])) {
-			$_SESSION['current']++;
+			if ($is_prev) {
+				if (--$_SESSION['current'] < 0) {
+					$_SESSION['current'] = count($_SESSION['arr']) - 1;
+				}
+			} else {
+				if (++$_SESSION['current'] >= count($_SESSION['arr'])) {
+					$_SESSION['current'] = 0;
+				}
+			}
 		} else {
 			$_SESSION['current'] = 0;
 		}
 
-		if (!isset($_SESSION['arr']) || $_SESSION['current'] >= count($_SESSION['arr'])) {
+		if (!isset($_SESSION['arr'])) {
 			$arr = array();
 
 			if ($result = $this->db->query("SELECT `hash`, `type` FROM `video_info`")) {
@@ -47,7 +55,6 @@ class VideoRoulette {
 			shuffle($arr);
 
 			$_SESSION['arr'] = $arr;
-			$_SESSION['current'] = 0;
 		}
 
 		echo json_encode($_SESSION['arr'][ $_SESSION['current'] ]);

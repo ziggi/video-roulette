@@ -31,6 +31,7 @@ include_once 'bootstrap.php';
 					<input type="file" name="file" id="file-input">
 				</form>
 			</div>
+			<div id="prev" class="btn" title="Prev">&#8678;</div>
 			<div id="next" class="btn" title="Next">&#8680;</div>
 			<div id="report" class="btn pull-right" title="Report">!</div>
 		</div>
