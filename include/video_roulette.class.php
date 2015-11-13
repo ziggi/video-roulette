@@ -1,13 +1,7 @@
 <?php
 
-class VideoRoulette {
-	private static $_db_info = array(
-			'host' => 'localhost',
-			'username' => 'root',
-			'passwd' => 'root',
-			'dbname' => 'test'
-		);
-
+class VideoRoulette
+{
 	const MAX_FILE_SIZE = '15M';
 	const MAX_REPORTS_IN_DAY = 10;
 
@@ -17,15 +11,17 @@ class VideoRoulette {
 
 	private $db;
 
-	function __construct() {
-		$this->db = new mysqli(self::$_db_info['host'], self::$_db_info['username'], self::$_db_info['passwd'], self::$_db_info['dbname']);
+	public static $upload_file_dir;
 
-		if ($this->db->connect_errno) {
-			exit();
-		}
+	function __construct($file_dir, $host, $base, $user, $password)
+	{
+		self::$upload_file_dir = __DIR__ . '/../' . $file_dir;
+
+		$this->db = new PDO("mysql:host=$host;dbname=$base", $user, $password);
 	}
 
-	public function get_random_file($is_prev = false) {
+	public function get_random_file($is_prev = false)
+	{
 		session_start();
 
 		if (isset($_SESSION['current'])) {
@@ -45,25 +41,22 @@ class VideoRoulette {
 		if (!isset($_SESSION['arr'])) {
 			$arr = array();
 
-			$query = "	SELECT
-							`hash`,
-							`type`
-						FROM
-							`video_info`
-							LEFT JOIN `video_report` on
-								`video_report`.`video_id` = `video_info`.`id`
-						GROUP BY
-							`video_info`.`id`
-						HAVING
-							count(`video_report`.`id`) < 5
-						";
+			$query = "SELECT
+			              `hash`,
+			              `type`
+			          FROM
+			              `video_info`
+			          LEFT JOIN `video_report` on
+			              `video_report`.`video_id` = `video_info`.`id`
+			          GROUP BY
+			              `video_info`.`id`
+			          HAVING
+			              count(`video_report`.`id`) < 5";
 
-			if ($result = $this->db->query($query)) {
-				while ($row = $result->fetch_row()) {
+			if ($sth = $this->db->query($query)) {
+				while ($row = $sth->fetch()) {
 					$arr[] = array('hash' => $row[0], 'type' => $row[1]);
 				}
-
-				$result->close();
 			}
 			shuffle($arr);
 
@@ -73,7 +66,8 @@ class VideoRoulette {
 		echo json_encode($_SESSION['arr'][ $_SESSION['current'] ]);
 	}
 
-	public function upload_file($files) {
+	public function upload_file($files)
+	{
 		$array_result = array();
 
 		// error checking
@@ -117,9 +111,9 @@ class VideoRoulette {
 		}
 
 		// generate new name
-		$array_result['type'] = $this->_allowed_types[ $type ]['file_format'];
+		$array_result['type'] = $this->get_type_file_format($type);
 		$new_name = $array_result['hash'] . '.' . $array_result['type'];
-		$file_path = __DIR__ . '/file/' . $new_name[0] . '/' . $new_name[1] . '/';
+		$file_path = self::$upload_file_dir . $new_name[0] . '/' . $new_name[1] . '/';
 
 		// move temp file with new name
 		if (!file_exists($file_path)) {
@@ -127,14 +121,21 @@ class VideoRoulette {
 		}
 		move_uploaded_file($file['tmp_name'], $file_path . $new_name);
 
-		// 
-		$this->db->query("INSERT INTO `video_info` (`hash`, `type`) VALUES ('" . $array_result['hash'] . "', '" . $array_result['type'] . "')");
+		// add into db
+		$query = "INSERT INTO `video_info`
+		              (`hash`, `type`)
+		          VALUES
+		              (?, ?)";
+
+		$sth = $this->db->prepare($query);
+		$sth->execute(array($array_result['hash'], $array_result['type']));
 
 		// 
 		echo json_encode($array_result);
 	}
 
-	public function report($file_hash) {
+	public function report($file_hash)
+	{
 		if (!$this->is_valid_hash($file_hash)) {
 			return false;
 		}
@@ -142,11 +143,18 @@ class VideoRoulette {
 		// get file id
 		$file_id = null;
 
-		if ($result = $this->db->query("SELECT `id` FROM `video_info` WHERE `hash` = '" . $file_hash . "'")) {
-			$row = $result->fetch_row();
-			$file_id = $row[0];
+		$query = "SELECT
+		              `id`
+		          FROM
+		              `video_info`
+		          WHERE
+		              `hash` = ?";
 
-			$result->close();
+		$sth = $this->db->prepare($query);
+
+		if ($sth->execute(array($file_hash))) {
+			$row = $sth->fetch();
+			$file_id = $row[0];
 		}
 
 		// get ip
@@ -163,21 +171,20 @@ class VideoRoulette {
 		$ip = ip2long($ip);
 
 		// get count
-		$query = "	SELECT 
-						count(`id`)
-					FROM
-						`video_report`
-					WHERE
-						`ip` = " . $ip . " AND
-						`video_id` = $file_id AND
-						`date` > CURRENT_TIMESTAMP - 86400
-					";
+		$query = "SELECT
+		              count(`id`)
+		          FROM
+		              `video_report`
+		          WHERE
+		              `ip` = ? AND
+		              `video_id` = ? AND
+		              `date` > CURRENT_TIMESTAMP - 86400";
 
-		if ($result = $this->db->query($query)) {
-			$row = $result->fetch_row();
+		$sth = $this->db->prepare($query);
+
+		if ($sth->execute(array($ip, $file_id))) {
+			$row = $sth->fetch();
 			$count = $row[0];
-			
-			$result->close();
 
 			if ($count > 0) {
 				return false;
@@ -185,20 +192,19 @@ class VideoRoulette {
 		}
 
 		// get count on ip
-		$query = "	SELECT 
-						count(`id`)
-					FROM
-						`video_report`
-					WHERE
-						`ip` = " . $ip . " AND
-						`date` > CURRENT_TIMESTAMP - 86400
-					";
+		$query = "SELECT
+		              count(`id`)
+		          FROM
+		              `video_report`
+		          WHERE
+		              `ip` = ? AND
+		              `date` > CURRENT_TIMESTAMP - 86400";
 
-		if ($result = $this->db->query($query)) {
-			$row = $result->fetch_row();
+		$sth = $this->db->prepare($query);
+
+		if ($sth->execute(array($ip))) {
+			$row = $sth->fetch();
 			$count = $row[0];
-			
-			$result->close();
 
 			if ($count > self::MAX_REPORTS_IN_DAY) {
 				return false;
@@ -206,15 +212,25 @@ class VideoRoulette {
 		}
 
 		// add
-		$this->db->query("INSERT INTO `video_report` (`video_id`, `ip`) VALUES (" . $file_id . ", " . $ip . ")");
+		$query = "INSERT INTO `video_report`
+		              (`video_id`, `ip`)
+		          VALUES
+		              (?, ?)";
+
+		$sth = $this->db->prepare($query);
+
+		$sth->execute(array($file_id, $ip));
+
 		return true;
 	}
 
-	public function is_valid_hash($file_hash) {
+	public function is_valid_hash($file_hash)
+	{
 		return preg_match('/^[0-9a-f]{32}$/', $file_hash) == 1;
 	}
 
-	public function is_support_size($size) {
+	public function is_support_size($size)
+	{
 		$is_app_support_size = $size <= $this->return_bytes(self::MAX_FILE_SIZE);
 		$is_php_support_size = $size <= $this->return_bytes(ini_get('upload_max_filesize'));
 		$is_post_support_size = $size <= $this->return_bytes(ini_get('post_max_size'));
@@ -226,29 +242,44 @@ class VideoRoulette {
 		return true;
 	}
 
-	public function is_support_type($type) {
+	public function is_support_type($type)
+	{
 		if (!isset($this->_allowed_types[$type])) {
 			return false;
 		}
 		return true;
 	}
 
-	public function is_file_exist($file_hash) {
+	public function get_type_file_format($type)
+	{
+		return $this->_allowed_types[$type]['file_format'];
+	}
+
+	public function is_file_exist($file_hash)
+	{
 		$is_exist = false;
 
-		if ($result = $this->db->query("SELECT count(`id`) FROM `video_info` WHERE `hash` = '" . $file_hash . "'", MYSQLI_USE_RESULT)) {
-			$row = $result->fetch_row();
+		$query = "SELECT
+		              count(`id`)
+		          FROM
+		              `video_info`
+		          WHERE
+		              `hash` = ?";
+
+		$sth = $this->db->prepare($query);
+
+		if ($sth->execute(array($file_hash))) {
+			$row = $sth->fetch();
 			if ($row[0] > 0) {
 				$is_exist = true;
 			}
-
-			$result->close();
 		}
 
 		return $is_exist;
 	}
 
-	public function return_bytes($val) {
+	public function return_bytes($val)
+	{
 		$val = trim($val);
 		$last = strtolower($val[ strlen($val) - 1 ]);
 

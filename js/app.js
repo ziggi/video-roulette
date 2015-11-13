@@ -14,7 +14,7 @@ window.addEventListener('load', function() {
 		}
 
 		var req = new XMLHttpRequest();
-		req.open('POST', 'report.php', true);
+		req.open('POST', 'api/report.php', true);
 
 		req.onreadystatechange = function () {
 			if (req.readyState != 4 || req.status != 200) {
@@ -56,7 +56,7 @@ window.addEventListener('load', function() {
 
 		var req = new XMLHttpRequest();
 
-		req.open('POST', 'getvideo.php', true);
+		req.open('POST', 'api/getvideo.php', true);
 
 		req.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
 
@@ -83,7 +83,7 @@ window.addEventListener('load', function() {
 	function loadBackground() {
 		var req = new XMLHttpRequest();
 
-		req.open('POST', 'getbackground.php', true);
+		req.open('POST', 'api/getbackground.php', true);
 
 		req.onreadystatechange = function () {
 			if (req.readyState != 4 || req.status != 200) {

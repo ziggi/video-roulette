@@ -10,13 +10,13 @@ window.addEventListener('load', function() {
 		}
 
 		var req = new XMLHttpRequest();
-		req.open('POST', 'upload.php', true);
+		req.open('POST', 'api/upload.php', true);
 
 		req.onreadystatechange = function () {
 			if (req.readyState != 4 || req.status != 200) {
 				return;
 			}
-
+console.log(req.responseText);
 			var result = JSON.parse(req.responseText);
 			if (result.error.upload == 0) {
 				alertify.log("File has been uploaded");
