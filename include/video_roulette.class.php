@@ -2,8 +2,9 @@
 
 class VideoRoulette
 {
-	const MAX_FILE_SIZE = '15M';
-	const MAX_REPORTS_IN_DAY = 10;
+	public static $upload_file_dir;
+	public static $max_file_size;
+	public static $max_reports_in_day;
 
 	private $_allowed_types = array(
 			'video/webm' => array('file_format' => 'webm'),
@@ -11,13 +12,13 @@ class VideoRoulette
 
 	private $db;
 
-	public static $upload_file_dir;
-
-	function __construct($file_dir, $host, $base, $user, $password)
+	function __construct($conf)
 	{
-		self::$upload_file_dir = __DIR__ . '/../' . $file_dir;
+		self::$upload_file_dir = __DIR__ . '/../' . $conf['file_dir'];
+		self::$max_file_size = $conf['max_file_size'];
+		self::$max_reports_in_day = $conf['max_reports_in_day'];
 
-		$this->db = new PDO("mysql:host=$host;dbname=$base", $user, $password);
+		$this->db = new PDO("mysql:host=" . $conf['db']['host'] . ";dbname=" . $conf['db']['base'], $conf['db']['user'], $conf['db']['pass']);
 	}
 
 	public function get_random_file($is_prev = false)
@@ -206,7 +207,7 @@ class VideoRoulette
 			$row = $sth->fetch();
 			$count = $row[0];
 
-			if ($count > self::MAX_REPORTS_IN_DAY) {
+			if ($count > self::$max_reports_in_day) {
 				return false;
 			}
 		}
@@ -231,7 +232,7 @@ class VideoRoulette
 
 	public function is_support_size($size)
 	{
-		$is_app_support_size = $size <= $this->return_bytes(self::MAX_FILE_SIZE);
+		$is_app_support_size = $size <= $this->return_bytes(self::$max_file_size);
 		$is_php_support_size = $size <= $this->return_bytes(ini_get('upload_max_filesize'));
 		$is_post_support_size = $size <= $this->return_bytes(ini_get('post_max_size'));
 

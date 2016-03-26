@@ -8,6 +8,6 @@ include '../include/video_roulette.class.php';
 header('Access-Control-Allow-Origin: *');
 
 // upload file
-$app = new VideoRoulette($conf['file_dir'], $conf['db']['host'], $conf['db']['base'], $conf['db']['user'], $conf['db']['pass']);
+$app = new VideoRoulette($conf);
 
 $app->upload_file($_FILES);

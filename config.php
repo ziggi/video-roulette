@@ -3,6 +3,10 @@
 return array(
 	// upload file dir
 	'file_dir' => 'file/',
+	// max file size (you can use M, G or K modifier)
+	'max_file_size' => '15M',
+	// max reports in day
+	'max_reports_in_day' => 5,
 	// database
 	'db' => array(
 			'host' => 'localhost',

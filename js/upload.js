@@ -16,7 +16,7 @@ window.addEventListener('load', function() {
 			if (req.readyState != 4 || req.status != 200) {
 				return;
 			}
-console.log(req.responseText);
+
 			var result = JSON.parse(req.responseText);
 			if (result.error.upload == 0) {
 				alertify.log("File has been uploaded");
