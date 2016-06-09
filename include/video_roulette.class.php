@@ -64,7 +64,9 @@ class VideoRoulette
 			$_SESSION['arr'] = $arr;
 		}
 
-		echo json_encode($_SESSION['arr'][ $_SESSION['current'] ]);
+		if (isset($_SESSION['arr'][ $_SESSION['current'] ])) {
+			echo json_encode($_SESSION['arr'][ $_SESSION['current'] ]);
+		}
 	}
 
 	public function upload_file($files)
@@ -87,6 +89,12 @@ class VideoRoulette
 
 		if ($file['error'] === 1) {
 			$array_result['error']['upload'] = 1;
+		}
+
+		if (!file_exists($file['tmp_name'])) {
+			$array_result['error']['upload'] = 1;
+			echo json_encode($array_result);
+			return;
 		}
 
 		$type = finfo_file(finfo_open(FILEINFO_MIME_TYPE), $file['tmp_name']);
@@ -131,7 +139,7 @@ class VideoRoulette
 		$sth = $this->db->prepare($query);
 		$sth->execute(array($array_result['hash'], $array_result['type']));
 
-		// 
+		//
 		echo json_encode($array_result);
 	}
 
@@ -295,4 +303,4 @@ class VideoRoulette
 
 		return $val;
 	}
-} 
+}

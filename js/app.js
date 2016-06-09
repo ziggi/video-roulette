@@ -23,7 +23,7 @@ window.addEventListener('load', function() {
 
 			alertify.log(req.responseText);
 		};
-		
+
 		req.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
 
 		req.send('hash=' + currentVideo.hash);
@@ -64,8 +64,16 @@ window.addEventListener('load', function() {
 			if (req.readyState != 4 || req.status != 200) {
 				return;
 			}
-			
+
+			if (req.responseText.length == 0) {
+				return;
+			}
+
 			currentVideo = JSON.parse(req.responseText);
+			if (!currentVideo) {
+				return;
+			}
+
 			container.getElementsByTagName('source')[0].src = currentVideo.hash + '.' + currentVideo.type;
 			container.load();
 			container.play();

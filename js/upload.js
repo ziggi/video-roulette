@@ -1,4 +1,4 @@
-window.addEventListener('load', function() { 
+window.addEventListener('load', function() {
 	document.getElementById('add').addEventListener('click', function() {
 		document.getElementById('file-input').click();
 	});
