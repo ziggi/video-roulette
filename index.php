@@ -13,7 +13,7 @@ include_once 'bootstrap.php';
 </head>
 <body>
 	<div id="info">
-		<span>Video Roulette v1.2</span>
+		<span>Video Roulette v1.3</span>
 		<span><a href="https://github.com/ziggi/video-roulette" target="_blank">GitHub</a></span>
 		<span><a href="https://ziggi.org/" target="_blank">Home</a></span>
 	</div>
