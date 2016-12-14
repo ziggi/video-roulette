@@ -15,7 +15,7 @@ include_once 'bootstrap.php';
 	<div id="info">
 		<span>Video Roulette v1.2</span>
 		<span><a href="https://github.com/ziggi/video-roulette" target="_blank">GitHub</a></span>
-		<span><a href="http://ziggi.org/" target="_blank">Home</a></span>
+		<span><a href="https://ziggi.org/" target="_blank">Home</a></span>
 	</div>
 	<div id="middle">
 		<div id="content">
