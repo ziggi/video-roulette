@@ -1,7 +1,7 @@
 @import url(http://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,700italic,700,300,400&subset=latin,cyrillic);
 
 body {
-	background-color: #000;
+	background-color: #222;
 	background-size: cover;
 	margin: 0;
 	padding: 0;
@@ -91,19 +91,19 @@ body {
 }
 
 #info a:hover {
-	text-decoration: none;
+	color: #fff;
 }
 
 #info span, #info a {
-	color: #777;
+	color: #eee;
 	font-size: 12px;
 	font-weight: bold;
-	text-shadow: 1px 2px 3px rgba(0,0,0,0.6)
+	text-shadow: 2px 2px 3px rgba(0,0,0,1.0);
 }
 
 #info span {
 	padding: 0 3px 0 3px;
-} 
+}
 
 @media only screen and (max-width: 800px) {
 	#middle {
